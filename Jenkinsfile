@@ -71,8 +71,8 @@ pipeline {
             steps {
                 script {
                     def report = readJSON file: "${env.WORKSPACE}\\reports\\report.json"
-                    def total = report.run.stats.tests.total
-                    def failed = report.run.stats.tests.failed
+                    def total = report.run.stats.testScripts.total
+                    def failed = report.run.stats.testScripts.failed
                     def passed = total - failed
                     def passRate = (passed / total) * 100
 

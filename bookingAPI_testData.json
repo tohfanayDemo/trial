@@ -1277,24 +1277,52 @@
 			   {
                   "scenarioName":"Incorrect PathParameter - Non-existing ID",
                   "bookingId":111111111,
+				  "firstname":"ToffeUpdate",
+				  "lastname":"Update",
+				  "totalprice":100,
+                  "depositpaid":true,
+                  "checkin":"2025-05-18",
+                  "checkout":"2025-05-30",
+                  "additionalneeds":"Only vegan meal for Breakfast",
                   "statusCode":404,
                   "statusLine":"Not Found"
                },
                {
                   "scenarioName":"Incorrect PathParameter - String", 
                   "bookingId":"Twelve",
+				  "firstname":"ToffeUpdate",
+				  "lastname":"Update",
+				  "totalprice":100,
+                  "depositpaid":true,
+                  "checkin":"2025-05-18",
+                  "checkout":"2025-05-30",
+                  "additionalneeds":"Only vegan meal for Breakfast",
                   "statusCode":400,
                   "statusLine":"Bad Request"
                },
                {
                   "scenarioName":"Incorrect PathParameter - Special Character", 
                   "bookingId":"@-$",
+				  "firstname":"ToffeUpdate",
+				  "lastname":"Update",
+				  "totalprice":100,
+                  "depositpaid":true,
+                  "checkin":"2025-05-18",
+                  "checkout":"2025-05-30",
+                  "additionalneeds":"Only vegan meal for Breakfast",
                   "statusCode":400,
                   "statusLine":"Bad Request"
                },
                {
                   "scenarioName":"Incorrect PathParameter - Null Value",
                   "bookingId":null,
+				  "firstname":"ToffeUpdate",
+				  "lastname":"Update",
+				  "totalprice":100,
+                  "depositpaid":true,
+                  "checkin":"2025-05-18",
+                  "checkout":"2025-05-30",
+                  "additionalneeds":"Only vegan meal for Breakfast",
                   "statusCode":400,
                   "statusLine":"Bad Request"
                }
