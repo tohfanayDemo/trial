@@ -1,0 +1,2149 @@
+{
+	"info": {
+		"_postman_id": "8ae0a803-84e5-450a-a9f8-3d14f1d9be78",
+		"name": "Booking",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19273618"
+	},
+	"item": [
+		{
+			"name": "Create Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.variables.set(\"token\", response.token)\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\" : \"{{username}}\",\n    \"password\" : \"{{password}}\"\n}\n\n\n\n\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/auth",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - CreateToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expMessage = pm.variables.get(\"message\");\r",
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    responseValidation.validateResponseHeaderContentType_html();\r",
+							"}\r",
+							"else if(scenarioName.includes(\"Incorrect Credentials\")){\r",
+							"    responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"     pm.test(`Validate ${scenarioName} - JSON Response msg`, () => {    \r",
+							"        pm.expect(pm.response.json().reason).to.eql(expMessage); \r",
+							"    });\r",
+							"}\r",
+							"else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \"+scenarioName)\r",
+							"\r",
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\",baseURL);\r",
+							"\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"auth\");\r",
+							"pm.variables.set(\"endPoint\",endPoint);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"POST\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"let username = util.getVariableOrEnv(\"username\", \"username\", \"\");\r",
+							"pm.variables.set(\"username\",username);\r",
+							"\r",
+							"let password = util.getVariableOrEnv(\"password\", \"password\", \"\");\r",
+							"pm.variables.set(\"password\",password);\r",
+							"\r",
+							"//Tweak data based on scenario needs\r",
+							"if(scenarioName === \"Incorrect Content-Type\"){\r",
+							"    var contentType = \"application/xml\"; \r",
+							"\r",
+							"    // Set the header for Content-Type\r",
+							"    pm.request.headers.add({\r",
+							"        key: \"Content-Type\",\r",
+							"        value: contentType\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\" : \"{{username}}\",\n    \"password\" : \"{{password}}\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllBookings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"//1. Status\r",
+							"responseValidation.validateStatusCode_200();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_OK();\r",
+							"\r",
+							"//3. Test for Content-Type header having a particular value\r",
+							"responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"//4. Schema Validation \r",
+							"const schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"  \"title\": \"Generated schema for Root\",\r",
+							"  \"type\": \"array\",\r",
+							"  \"items\": {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"      \"bookingid\": {\r",
+							"        \"type\": \"number\"\r",
+							"      }\r",
+							"    },\r",
+							"    \"required\": [\r",
+							"      \"bookingid\"\r",
+							"    ]\r",
+							"  }\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate Schema\"),function(){\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"}\r",
+							"\r",
+							"//SET TOTAL COUNT\r",
+							"const totalCountBeforeBooking = response.length;\r",
+							"pm.collectionVariables.set(\"totalCountBeforeBooking\", totalCountBeforeBooking)\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/booking",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - GetAllBookings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"if(pm.response.code >= 500){\r",
+							"\r",
+							"    var retryCount = pm.collectionVariables.get('retryCounter');\r",
+							"\r",
+							"    if (retryCount >= 1) {\r",
+							"        console.log(`BEFORE -- retrycounter value at post response level = ${retryCount}`)        \r",
+							"        pm.collectionVariables.set('retryCounter', --retryCount)\r",
+							"        console.log(`AFTER -- retrycounter value at post response level = `+pm.collectionVariables.get('retryCounter'))\r",
+							"\r",
+							"        //this gives this request name , you don't have to hardcode\r",
+							"        pm.execution.setNextRequest(pm.info.requestName);\r",
+							"    }else{\r",
+							"        pm.collectionVariables.unset('retryCounter');\r",
+							"    }\r",
+							"}\r",
+							"else{\r",
+							"        pm.collectionVariables.unset('retryCounter');\r",
+							"    }\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status Code\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header Content Type\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    pm.test(`Validate ${scenarioName} - Content-Type header is text/html`, () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+							"    });\r",
+							"}else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\",baseURL);\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"booking\");\r",
+							"pm.variables.set(\"endPoint\",endPoint);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"GET\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"var retryCount = pm.collectionVariables.get('retryCounter');\r",
+							"if (!retryCount) {\r",
+							"   pm.collectionVariables.set('retryCounter',(2));\r",
+							"   console.log(`retrycounter value at PRE-REQUEST Script level = `+pm.collectionVariables.get('retryCounter'))\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateBooking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"var firstname = response.booking.firstname;\r",
+							"var lastname = response.booking.lastname;\r",
+							"var totalprice = response.booking.totalprice;\r",
+							"var depositpaid = response.booking.depositpaid;\r",
+							"var checkin = response.booking.bookingdates.checkin;\r",
+							"var checkout = response.booking.bookingdates.checkout;\r",
+							"var additionalneeds = response.booking.additionalneeds;\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"    //1. Status\r",
+							"    responseValidation.validateStatusCode_201();\r",
+							"\r",
+							"    //2. Status Line\r",
+							"    responseValidation.validateStatusLine_Created();\r",
+							"\r",
+							"\r",
+							"    //3. Test for Content-Type header having a particular value\r",
+							"    responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"\r",
+							"    //4. Schema Validation \r",
+							"    const schema = {\r",
+							"    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"    \"title\": \"Generated schema for Root\",\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"bookingid\": {\r",
+							"        \"type\": \"number\"\r",
+							"        },\r",
+							"        \"booking\": {\r",
+							"        \"type\": \"object\",\r",
+							"        \"properties\": {\r",
+							"            \"firstname\": {\r",
+							"            \"type\": \"string\"\r",
+							"            },\r",
+							"            \"lastname\": {\r",
+							"            \"type\": \"string\"\r",
+							"            },\r",
+							"            \"totalprice\": {\r",
+							"            \"type\": \"number\"\r",
+							"            },\r",
+							"            \"depositpaid\": {\r",
+							"            \"type\": \"boolean\"\r",
+							"            },\r",
+							"            \"bookingdates\": {\r",
+							"            \"type\": \"object\",\r",
+							"            \"properties\": {\r",
+							"                \"checkin\": {\r",
+							"                \"type\": \"string\"\r",
+							"                },\r",
+							"                \"checkout\": {\r",
+							"                \"type\": \"string\"\r",
+							"                }\r",
+							"            },\r",
+							"            \"required\": [\r",
+							"                \"checkin\",\r",
+							"                \"checkout\"\r",
+							"            ]\r",
+							"            },\r",
+							"            \"additionalneeds\": {\r",
+							"            \"type\": \"string\"\r",
+							"            }\r",
+							"        },\r",
+							"        \"required\": [\r",
+							"            \"firstname\",\r",
+							"            \"lastname\",\r",
+							"            \"totalprice\",\r",
+							"            \"depositpaid\",\r",
+							"            \"bookingdates\",\r",
+							"            \"additionalneeds\"\r",
+							"        ]\r",
+							"        }\r",
+							"    },\r",
+							"    \"required\": [\r",
+							"        \"bookingid\",\r",
+							"        \"booking\"\r",
+							"    ]\r",
+							"    }\r",
+							"\r",
+							"    pm.test(\"Validate Schema\"),function(){\r",
+							"        pm.response.to.have.jsonSchema(schema);\r",
+							"    }\r",
+							"\r",
+							"    //5. Request VS Response Body Validation\r",
+							"    pm.test(\"Booking details in Request and Response matches\", function () {\r",
+							"\r",
+							"        // Get the raw request body and Parse it to JSON\r",
+							"        const rawRequestBody = pm.request.body.raw;\r",
+							"        const requestBody = JSON.parse(rawRequestBody);\r",
+							"\r",
+							"        pm.expect(requestBody.firstname).to.eql(firstname);\r",
+							"        pm.expect(requestBody.lastname).to.eql(lastname);\r",
+							"        pm.expect(requestBody.totalprice).to.eql(totalprice);\r",
+							"        pm.expect(requestBody.depositpaid).to.eql(depositpaid);\r",
+							"        pm.expect(requestBody.bookingdates.checkin).to.eql(checkin);\r",
+							"        pm.expect(requestBody.bookingdates.checkout).to.eql(checkout);\r",
+							"        pm.expect(requestBody.additionalneeds).to.eql(additionalneeds);\r",
+							"    });\r",
+							"\r",
+							"    //6. GET ALL BOOKING COUNT AFTER BOOKING CREATION\r",
+							"    pm.test(\"Check Total Booking Count increased by 1\", function () {\r",
+							"        \r",
+							"        // Perform GET request for All Bookings\r",
+							"        pm.sendRequest({\r",
+							"            url: pm.environment.get(\"baseURL\")+'/booking',  \r",
+							"            method: 'GET',\r",
+							"            header: {\r",
+							"               'Content-Type': 'application/json'\r",
+							"            }\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.log(err);\r",
+							"                return;\r",
+							"            } else {\r",
+							"               \r",
+							"                const bookings = res.json(); \r",
+							"                const count = bookings.length; \r",
+							"                \r",
+							"                    pm.expect(bookings).to.include(bookingID);\r",
+							"                    pm.expect(count).to.equal((pm.collectionVariables.get(\"totalCountBeforeBooking\"))+1);                 \r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"\r",
+							"\r",
+							"    //Set bookingId at collection level\r",
+							"    const bookingID = response.bookingid\r",
+							"    pm.collectionVariables.set(\"bookingId\", bookingID)\r",
+							"\r",
+							"    //SET VALUE AT RUN TIME\r",
+							"    const booking = {\r",
+							"        \"firstname\": firstname,\r",
+							"        \"lastname\": lastname,\r",
+							"        \"totalprice\": totalprice,\r",
+							"        \"depositpaid\": depositpaid,\r",
+							"        \"checkin\": checkin,\r",
+							"        \"checkout\": checkout,\r",
+							"        \"additionalneeds\": additionalneeds\r",
+							"    }\r",
+							"\r",
+							"    pm.collectionVariables.set(\"booking\", booking);\r",
+							" \r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstname}}\",\r\n    \"lastname\" : \"{{lastname}}\",\r\n    \"totalprice\" : {{totalprice}},\r\n    \"depositpaid\" : {{depositpaid}},\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"{{checkin}}\",\r\n        \"checkout\" : \"{{checkout}}\"\r\n    },\r\n    \"additionalneeds\" : \"{{additionalneeds}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/booking",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - CreateBooking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expMessage = pm.variables.get(\"message\");\r",
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status Code\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header Content Type\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    pm.test(`Validate ${scenarioName} - Content-Type header is text/html`, () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+							"    });\r",
+							"}else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \"+scenarioName)\r",
+							"\r",
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\",baseURL);\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"booking\");\r",
+							"pm.variables.set(\"endPoint\",endPoint);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"POST\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"//Tweak data based on scenario needs\r",
+							"if(scenarioName === \"Incorrect Content-Type\"){\r",
+							"    var contentType = \"application/xml\"; \r",
+							"\r",
+							"    // Set the header for Content-Type\r",
+							"    pm.request.headers.add({\r",
+							"        key: \"Content-Type\",\r",
+							"        value: contentType\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"var createBookingPayload= util.getBookingPayload(pm.variables.get('currentDataset'))\r",
+							"pm.variables.set(\"createBookingPayload\", JSON.stringify(createBookingPayload, null, 2));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{createBookingPayload}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetBookingById",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const resposne = pm.response.json();\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"//1. Status\r",
+							"responseValidation.validateStatusCode_200();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_OK();\r",
+							"\r",
+							"//3. Test for Content-Type header having a particular value\r",
+							"responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"//4 Schema Validation\r",
+							"const schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"  \"title\": \"Generated schema for Root\",\r",
+							"  \"type\": \"object\",\r",
+							"  \"properties\": {\r",
+							"    \"firstname\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"lastname\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"totalprice\": {\r",
+							"      \"type\": \"number\"\r",
+							"    },\r",
+							"    \"depositpaid\": {\r",
+							"      \"type\": \"boolean\"\r",
+							"    },\r",
+							"    \"bookingdates\": {\r",
+							"      \"type\": \"object\",\r",
+							"      \"properties\": {\r",
+							"        \"checkin\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"checkout\": {\r",
+							"          \"type\": \"string\"\r",
+							"        }\r",
+							"      },\r",
+							"      \"required\": [\r",
+							"        \"checkin\",\r",
+							"        \"checkout\"\r",
+							"      ]\r",
+							"    },\r",
+							"    \"additionalneeds\": {\r",
+							"      \"type\": \"string\"\r",
+							"    }\r",
+							"  },\r",
+							"  \"required\": [\r",
+							"    \"firstname\",\r",
+							"    \"lastname\",\r",
+							"    \"totalprice\",\r",
+							"    \"depositpaid\",\r",
+							"    \"bookingdates\",\r",
+							"    \"additionalneeds\"\r",
+							"  ]\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate Schema\"),function(){\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"}\r",
+							"\r",
+							"\r",
+							"//5. Response Body Validation\r",
+							"    pm.test(\"Booking details in Request and Response matches\", function () {\r",
+							"\r",
+							"        // Get Booking object from POST call from Collection Variable\r",
+							"        const booking = pm.collectionVariables.get(\"booking\");\r",
+							"\r",
+							"        \r",
+							"        //Compare Created booking details in POST Call with GET call response\r",
+							"        pm.expect(booking.firstname).to.eql(resposne.firstname);\r",
+							"        pm.expect(booking.lastname).to.eql(resposne.lastname);\r",
+							"        pm.expect(booking.totalprice).to.eql(resposne.totalprice);\r",
+							"        pm.expect(booking.depositpaid).to.eql(resposne.depositpaid);\r",
+							"        pm.expect(booking.checkin).to.eql(resposne.bookingdates.checkin);\r",
+							"        pm.expect(booking.checkout).to.eql(resposne.bookingdates.checkout);\r",
+							"        pm.expect(booking.additionalneeds).to.eql(resposne.additionalneeds);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/booking/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - GetBookingById",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status Code\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header Content Type\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    pm.test(`Validate ${scenarioName} - Content-Type header is text/html`, () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+							"    });\r",
+							"}else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \"+scenarioName)\r",
+							"\r",
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\",baseURL);\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"booking\");\r",
+							"pm.variables.set(\"endPoint\",endPoint);\r",
+							"\r",
+							"let bookingId = util.getVariableOrEnv(\"bookingId\", \"bookingId\", pm.collectionVariables.get(\"bookingId\"));\r",
+							"pm.variables.set(\"bookingId\",bookingId);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"GET\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetExistingBookingsByCheck-inTime",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Get Booking object from POST call from Collection Variable\r",
+							"const booking = pm.collectionVariables.get(\"booking\");\r",
+							"\r",
+							"pm.variables.set(\"checkin\", booking.checkin);\r",
+							"pm.variables.set(\"checkout\", booking.checkout);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"const responseSize = response.length;\r",
+							"\r",
+							"const checkinDate = pm.variables.get(\"checkin\")\r",
+							"const checkoutDate = pm.variables.get(\"checkout\")\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"//1. Status\r",
+							"responseValidation.validateStatusCode_200();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_OK();\r",
+							"\r",
+							"//3. Test for Content-Type header having a particular value\r",
+							"responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"//4 Schema Validation\r",
+							"const schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"  \"title\": \"Generated schema for Root\",\r",
+							"  \"type\": \"array\",\r",
+							"  \"items\": {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"      \"bookingid\": {\r",
+							"        \"type\": \"number\"\r",
+							"      }\r",
+							"    },\r",
+							"    \"required\": [\r",
+							"      \"bookingid\"\r",
+							"    ]\r",
+							"  }\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate Schema\"),function(){\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"}\r",
+							"\r",
+							"if(responseSize > 0){\r",
+							"\r",
+							"    //Fetch all the BookingIds from the response array\r",
+							"    const BookingIds = response.map((issue) => issue.bookingid)\r",
+							"\r",
+							"    for (const e of BookingIds){ \r",
+							"        \r",
+							"        pm.test(`BookingId ${e} is within ${checkinDate} and ${checkoutDate}`, function () {\r",
+							"\r",
+							"            // Perform GET request for a Given Booking Id\r",
+							"            pm.sendRequest({\r",
+							"                url: pm.environment.get(\"baseURL\")+'/booking/'+e,  \r",
+							"                method: 'GET',\r",
+							"                header: {\r",
+							"                'Content-Type': 'application/json'\r",
+							"                }\r",
+							"            }, function (err, res) {\r",
+							"                if (err) {\r",
+							"                    console.log(err);\r",
+							"                    return;\r",
+							"                } else {\r",
+							"                \r",
+							"                    const booking = res.json();                     \r",
+							"                         pm.expect(booking.bookingdates.checkin).to.be.greaterThanOrEqual(checkinDate);               \r",
+							"                         pm.expect(booking.bookingdates.checkout).to.be.lessThanOrEqual(checkoutDate);               \r",
+							"\r",
+							"                }\r",
+							"            });\r",
+							"               \r",
+							"        });       \r",
+							"\r",
+							"    }\r",
+							"\r",
+							"    \r",
+							"\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/booking?checkin={{checkin}}&checkout={{checkout}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "{{checkin}}"
+						},
+						{
+							"key": "checkout",
+							"value": "{{checkout}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateBooking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"var firstname = response.firstname;\r",
+							"var lastname = response.lastname;\r",
+							"var totalprice = response.totalprice;\r",
+							"var depositpaid = response.depositpaid;\r",
+							"var checkin = response.bookingdates.checkin;\r",
+							"var checkout = response.bookingdates.checkout;\r",
+							"var additionalneeds = response.additionalneeds;\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"    //1. Status\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"\r",
+							"    //2. Status Line\r",
+							"    pm.test(\"Status message is OK\", function () {\r",
+							"        pm.response.to.have.status(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    //3. Test for Content-Type header having a particular value\r",
+							"    pm.test(\"Content-Type header is application/json\", () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"    });\r",
+							"\r",
+							"    //4. Schema Validation \r",
+							"    const schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"  \"title\": \"Generated schema for Root\",\r",
+							"  \"type\": \"object\",\r",
+							"  \"properties\": {\r",
+							"    \"firstname\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"lastname\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"totalprice\": {\r",
+							"      \"type\": \"number\"\r",
+							"    },\r",
+							"    \"depositpaid\": {\r",
+							"      \"type\": \"boolean\"\r",
+							"    },\r",
+							"    \"bookingdates\": {\r",
+							"      \"type\": \"object\",\r",
+							"      \"properties\": {\r",
+							"        \"checkin\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"checkout\": {\r",
+							"          \"type\": \"string\"\r",
+							"        }\r",
+							"      },\r",
+							"      \"required\": [\r",
+							"        \"checkin\",\r",
+							"        \"checkout\"\r",
+							"      ]\r",
+							"    },\r",
+							"    \"additionalneeds\": {\r",
+							"      \"type\": \"string\"\r",
+							"    }\r",
+							"  },\r",
+							"  \"required\": [\r",
+							"    \"firstname\",\r",
+							"    \"lastname\",\r",
+							"    \"totalprice\",\r",
+							"    \"depositpaid\",\r",
+							"    \"bookingdates\",\r",
+							"    \"additionalneeds\"\r",
+							"  ]\r",
+							"}\r",
+							"\r",
+							"    pm.test(\"Validate Schema\"),function(){\r",
+							"        pm.response.to.have.jsonSchema(schema);\r",
+							"    }\r",
+							"\r",
+							"    //5. Request VS Response Body Validation\r",
+							"    pm.test(\"Booking details in Request and Response matches\", function () {\r",
+							"\r",
+							"        // Get the raw request body and Parse it to JSON\r",
+							"        const rawRequestBody = pm.request.body.raw;\r",
+							"        const requestBody = JSON.parse(rawRequestBody);\r",
+							"\r",
+							"        pm.expect(requestBody.firstname).to.eql(firstname);\r",
+							"        pm.expect(requestBody.lastname).to.eql(lastname);\r",
+							"        pm.expect(requestBody.totalprice).to.eql(totalprice);\r",
+							"        pm.expect(requestBody.depositpaid).to.eql(depositpaid);\r",
+							"        pm.expect(requestBody.bookingdates.checkin).to.eql(checkin);\r",
+							"        pm.expect(requestBody.bookingdates.checkout).to.eql(checkout);\r",
+							"        pm.expect(requestBody.additionalneeds).to.eql(additionalneeds);\r",
+							"    });\r",
+							"\r",
+							"    \r",
+							"\r",
+							"    //Set Updated Booking Object\r",
+							"        // Get Booking object from POST call from Collection Variable\r",
+							"        const booking = pm.collectionVariables.get(\"booking\");\r",
+							"\r",
+							"        booking.firstname = firstname;\r",
+							"        booking.lastname = lastname;\r",
+							"        booking.totalprice = totalprice;\r",
+							"        booking.depositpaid = depositpaid;\r",
+							"        booking.checkin = checkin;\r",
+							"        booking.checkout = checkout;\r",
+							"        booking.additionalneeds = additionalneeds;\r",
+							"    \r",
+							"        //Set updated Booking details at Collection Level Again\r",
+							"        pm.collectionVariables.set(\"booking\", booking);\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//Get token\r",
+							"util.generateAuthToken();\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstname}}\",\r\n    \"lastname\" : \"{{lastname}}\",\r\n    \"totalprice\" : {{totalprice}},\r\n    \"depositpaid\" : {{depositpaid}},\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"{{checkin}}\",\r\n        \"checkout\" : \"{{checkout}}\"\r\n    },\r\n    \"additionalneeds\" : \"{{additionalneeds}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/booking/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - UpdateBooking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expMessage = pm.variables.get(\"message\");\r",
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status Code\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header Content Type\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    pm.test(`Validate ${scenarioName} - Content-Type header is text/html`, () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+							"    });\r",
+							"}else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \"+scenarioName)\r",
+							"\r",
+							"//Get token\r",
+							"if (scenarioName && scenarioName.includes(\"No Token\")) {\r",
+							"    // Clear the token variable\r",
+							"    pm.variables.unset(\"token\");\r",
+							"\r",
+							"    // Ensure the Cookie header is either removed or cleared\r",
+							"    pm.request.headers.upsert({\r",
+							"        key: 'Cookie',\r",
+							"        value: ''\r",
+							"    });\r",
+							"} \r",
+							"else {\r",
+							"   util.generateAuthToken();\r",
+							"}\r",
+							"\r",
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\",baseURL);\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"booking\");\r",
+							"pm.variables.set(\"endPoint\",endPoint);\r",
+							"\r",
+							"let bookingId = util.getVariableOrEnv(\"bookingId\", \"bookingId\", pm.collectionVariables.get(\"bookingId\"));\r",
+							"pm.variables.set(\"bookingId\",bookingId);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"PUT\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"//work on setup for no auth scenario\r",
+							"if(scenarioName === \"Incorrect Content-Type\"){\r",
+							"    var contentType = \"application/xml\"; \r",
+							"\r",
+							"    // Set the header for Content-Type\r",
+							"    pm.request.headers.add({\r",
+							"        key: \"Content-Type\",\r",
+							"        value: contentType\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"\r",
+							"var updateBookingPayload= util.getBookingPayload(pm.variables.get('currentDataset'))\r",
+							"pm.variables.set(\"updateBookingPayload\", JSON.stringify(updateBookingPayload, null, 2));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{updateBookingPayload}}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetBookingByName",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const booking = pm.collectionVariables.get(\"booking\");\r",
+							"pm.variables.set(\"bookingFirstName\",booking.firstname)\r",
+							"pm.variables.set(\"bookingLastName\",booking.lastname)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"//1. Status\r",
+							"responseValidation.validateStatusCode_200();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_OK();\r",
+							"\r",
+							"//3. Test for Content-Type header having a particular value\r",
+							"responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"//4 Schema Validation\r",
+							"const schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"  \"title\": \"Generated schema for Root\",\r",
+							"  \"type\": \"array\",\r",
+							"  \"items\": {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"      \"bookingid\": {\r",
+							"        \"type\": \"number\"\r",
+							"      }\r",
+							"    },\r",
+							"    \"required\": [\r",
+							"      \"bookingid\"\r",
+							"    ]\r",
+							"  }\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate Schema\"),function(){\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.test(\"Check if bookingid matches\", function () {\r",
+							"    pm.expect(response[0].bookingid).to.eql(pm.collectionVariables.get(\"bookingId\"));\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/booking?firstname={{bookingFirstName}}&lastname={{bookingLastName}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "firstname",
+							"value": "{{bookingFirstName}}"
+						},
+						{
+							"key": "lastname",
+							"value": "{{bookingLastName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - GetBookingByName",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => { }, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \" + scenarioName)\r",
+							"\r",
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\", baseURL);\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"booking\");\r",
+							"pm.variables.set(\"endPoint\", endPoint);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"GET\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"const booking = pm.collectionVariables.get(\"booking\");\r",
+							"let bookingFirstName = util.getVariableOrEnv(\"bookingFirstName\", \"bookingFirstName\", booking.firstname);\r",
+							"pm.variables.set(\"bookingFirstName\", bookingFirstName)\r",
+							"\r",
+							"let bookingLastName = util.getVariableOrEnv(\"bookingLastName\", \"bookingLastName\", booking.lastname);\r",
+							"pm.variables.set(\"bookingLastName\", bookingLastName)\r",
+							"\r",
+							"\r",
+							"// Set the headers for the request\r",
+							"\r",
+							"    // Build the query string based on the scenario\r",
+							"    let queryString = \"\";\r",
+							"    if (scenarioName === \"Missing First Name\") {\r",
+							"        queryString = `?lastname=${encodeURIComponent(bookingLastName)}`;\r",
+							"    } else if (scenarioName === \"Missing Last Name\") {\r",
+							"        queryString = `?firstname=${encodeURIComponent(bookingFirstName)}`;\r",
+							"    } else if (scenarioName === \"Missing Both Names\") {\r",
+							"        queryString = \"\";\r",
+							"    } else {\r",
+							"        queryString = `?firstname=${encodeURIComponent(bookingFirstName)}&lastname=${encodeURIComponent(bookingLastName)}`;\r",
+							"    }\r",
+							"\r",
+							"    // Build full URL and override request URL\r",
+							"    let finalURL = `${baseURL}/${endPoint}${queryString}`;\r",
+							"    pm.request.url = finalURL;\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status Code\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header Content Type\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    pm.test(`Validate ${scenarioName} - Content-Type header is text/html`, () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+							"    });\r",
+							"}else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}?firstname={{bookingFirstName}}&lastname={{bookingLastName}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}"
+					],
+					"query": [
+						{
+							"key": "firstname",
+							"value": "{{bookingFirstName}}"
+						},
+						{
+							"key": "lastname",
+							"value": "{{bookingLastName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PartialUpdateBooking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"var firstname = response.firstname;\r",
+							"var lastname = response.lastname;\r",
+							"var totalprice = response.totalprice;\r",
+							"var depositpaid = response.depositpaid;\r",
+							"var checkin = response.bookingdates.checkin;\r",
+							"var checkout = response.bookingdates.checkout;\r",
+							"var additionalneeds = response.additionalneeds;\r",
+							"\r",
+							"//POSITIVE TEST VALIDATION\r",
+							"    //1. Status\r",
+							"    responseValidation.validateStatusCode_200();\r",
+							"\r",
+							"    //2. Status Line\r",
+							"    responseValidation.validateStatusLine_OK();\r",
+							"\r",
+							"    //3. Test for Content-Type header having a particular value\r",
+							"    responseValidation.validateResponseHeaderContentType_json();\r",
+							"\r",
+							"    //4. Schema Validation \r",
+							"    const schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+							"  \"title\": \"Generated schema for Root\",\r",
+							"  \"type\": \"object\",\r",
+							"  \"properties\": {\r",
+							"    \"firstname\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"lastname\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"totalprice\": {\r",
+							"      \"type\": \"number\"\r",
+							"    },\r",
+							"    \"depositpaid\": {\r",
+							"      \"type\": \"boolean\"\r",
+							"    },\r",
+							"    \"bookingdates\": {\r",
+							"      \"type\": \"object\",\r",
+							"      \"properties\": {\r",
+							"        \"checkin\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"checkout\": {\r",
+							"          \"type\": \"string\"\r",
+							"        }\r",
+							"      },\r",
+							"      \"required\": [\r",
+							"        \"checkin\",\r",
+							"        \"checkout\"\r",
+							"      ]\r",
+							"    },\r",
+							"    \"additionalneeds\": {\r",
+							"      \"type\": \"string\"\r",
+							"    }\r",
+							"  },\r",
+							"  \"required\": [\r",
+							"    \"firstname\",\r",
+							"    \"lastname\",\r",
+							"    \"totalprice\",\r",
+							"    \"depositpaid\",\r",
+							"    \"bookingdates\",\r",
+							"    \"additionalneeds\"\r",
+							"  ]\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate Schema\", function(){\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"// 5. Request VS Response Body Validation\r",
+							"pm.test(\"Booking details in Request and Response match\", function () {\r",
+							"    const rawRequestBody = pm.request.body.raw;\r",
+							"    const requestBody = JSON.parse(rawRequestBody);\r",
+							"\r",
+							"    // Flatten bookingdates into top-level keys for easier comparison\r",
+							"    const flattenedRequest = { ...requestBody };\r",
+							"    if (requestBody.bookingdates) {\r",
+							"        if (requestBody.bookingdates.checkin) {\r",
+							"            flattenedRequest.checkin = requestBody.bookingdates.checkin;\r",
+							"        }\r",
+							"        if (requestBody.bookingdates.checkout) {\r",
+							"            flattenedRequest.checkout = requestBody.bookingdates.checkout;\r",
+							"        }\r",
+							"    }\r",
+							"\r",
+							"    // Flatten PATCH response body similarly\r",
+							"    const flattenedResponse = { ...response };\r",
+							"    if (response.bookingdates) {\r",
+							"        if (response.bookingdates.checkin) {\r",
+							"            flattenedResponse.checkin = response.bookingdates.checkin;\r",
+							"        }\r",
+							"        if (response.bookingdates.checkout) {\r",
+							"            flattenedResponse.checkout = response.bookingdates.checkout;\r",
+							"        }\r",
+							"    }\r",
+							"\r",
+							"    // Fields to compare (if they exist in the request)\r",
+							"    const keysToCompare = [\"firstname\", \"lastname\", \"totalprice\", \"depositpaid\", \"checkin\", \"checkout\", \"additionalneeds\"];\r",
+							"\r",
+							"    keysToCompare.forEach(key => {\r",
+							"        if (flattenedRequest.hasOwnProperty(key)) {\r",
+							"            const expected = flattenedRequest[key];\r",
+							"            const actual = flattenedResponse[key];\r",
+							"\r",
+							"            pm.expect(actual, `Mismatch in '${key}'`).to.eql(expected);\r",
+							"        } \r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"//6. Check updated value in GET call\r",
+							"pm.test(`Check Updated Booking details in GET Call`, function () {\r",
+							"\r",
+							"    // Perform GET request for a Given Booking Id\r",
+							"    pm.sendRequest({\r",
+							"        url: pm.environment.get(\"baseURL\")+'/booking/'+ pm.collectionVariables.get(\"bookingId\"),  \r",
+							"\r",
+							"        method: 'GET',\r",
+							"        header: {\r",
+							"        'Content-Type': 'application/json'\r",
+							"        }\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.log(err);\r",
+							"            return;\r",
+							"        } else {\r",
+							"                \r",
+							"            const booking = res.json();    \r",
+							"                //compare GET call response with PATCH call response\r",
+							"                pm.expect(booking.firstname).to.be.eql(firstname);               \r",
+							"                pm.expect(booking.lastname).to.be.eql(lastname);               \r",
+							"                pm.expect(booking.totalprice).to.be.eql(totalprice);               \r",
+							"                pm.expect(booking.depositpaid).to.be.eql(depositpaid);               \r",
+							"                pm.expect(booking.bookingdates.checkin).to.be.eql(checkin);              \r",
+							"                pm.expect(booking.bookingdates.checkout).to.be.eql(checkout); \r",
+							"                pm.expect(booking.additionalneeds).to.be.eql(additionalneeds);               \r",
+							"                              \r",
+							"        }\r",
+							"    });\r",
+							"               \r",
+							"});\r",
+							"\r",
+							"//Set Updated Booking Object\r",
+							"    // Get Booking object from POST call from Collection Variable\r",
+							"    const booking = pm.collectionVariables.get(\"booking\");\r",
+							"\r",
+							"    booking.firstname = firstname;\r",
+							"    booking.lastname = lastname;\r",
+							"    booking.totalprice = totalprice;\r",
+							"    booking.depositpaid = depositpaid;\r",
+							"    booking.checkin = checkin;\r",
+							"    booking.checkout = checkout;\r",
+							"    booking.additionalneeds = additionalneeds; \r",
+							"\r",
+							"    //Set updated Booking details at Collection Level Again\r",
+							"    pm.collectionVariables.set(\"booking\", booking);\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \"+scenarioName)\r",
+							"\r",
+							"util.generateAuthToken();\r",
+							"\r",
+							"var partialUpdateBookingPayload= pm.variables.get('currentDataset');\r",
+							"\r",
+							"// Remove scenarioName\r",
+							"delete partialUpdateBookingPayload.scenarioName;\r",
+							"\r",
+							"\r",
+							"// Initialize bookingdates if checkin or checkout are present\r",
+							"if (partialUpdateBookingPayload.checkin || partialUpdateBookingPayload.checkout) {\r",
+							"    const bookingdates = {};\r",
+							"    if (partialUpdateBookingPayload.checkin) {\r",
+							"        bookingdates.checkin = partialUpdateBookingPayload.checkin;\r",
+							"        delete partialUpdateBookingPayload.checkin;\r",
+							"    }\r",
+							"    if (partialUpdateBookingPayload.checkout) {\r",
+							"        bookingdates.checkout = partialUpdateBookingPayload.checkout;\r",
+							"        delete partialUpdateBookingPayload.checkout;\r",
+							"    }\r",
+							"    partialUpdateBookingPayload.bookingdates = bookingdates;\r",
+							"}\r",
+							"\r",
+							"pm.variables.set(\"partialUpdateBookingPayload\", JSON.stringify(partialUpdateBookingPayload, null, 2));\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n    {{partialUpdateBookingPayload}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/booking/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteBooking",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"util.generateAuthToken();\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//POSITIVE TEST VALIDATION\r",
+							"    //1. Status\r",
+							"    responseValidation.validateStatusCode_204();\r",
+							"\r",
+							"    //2. Status Line\r",
+							"    responseValidation.validateStatusLine_NoContent();\r",
+							"\r",
+							"\r",
+							"    //3. Test for Content-Type header having a particular value\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"\r",
+							"\r",
+							"    //4. Check deleted Booking Id presence through GET call\r",
+							"    pm.test(`Check deleted Booking Id presence through GET call`, function () {\r",
+							"\r",
+							"        pm.sendRequest({\r",
+							"            url: pm.environment.get(\"baseURL\")+'/booking/'+ pm.collectionVariables.get(\"bookingId\"),  \r",
+							"            method: 'GET',\r",
+							"            header: {\r",
+							"            'Content-Type': 'application/json'\r",
+							"            }\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.log(err);\r",
+							"                return;\r",
+							"            } else {\r",
+							"                pm.response.to.have.status(404); \r",
+							"                pm.response.to.have.status(\"Not Found\");     \r",
+							"                pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');\r",
+							"                pm.response.to.have.body(\"Not Found\");\r",
+							"            }\r",
+							"        });\r",
+							"                \r",
+							"    });\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "token={{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/booking/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negative - DeleteBooking",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, 1000);\r",
+							"var scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"console.log(\"Inside pre-requisite --> Scenario Name \"+scenarioName)\r",
+							"\r",
+							"//Get token\r",
+							"if (scenarioName && scenarioName.includes(\"No Token\")) {\r",
+							"    pm.variables.unset(\"token\");\r",
+							"\r",
+							"    pm.request.headers.upsert({\r",
+							"        key: 'Cookie',\r",
+							"        value: ''\r",
+							"    });\r",
+							"} \r",
+							"else {\r",
+							"    util.generateAuthToken();\r",
+							"}\r",
+							"\r",
+							"//Set the test data for the request\r",
+							"let baseURL = util.getVariableOrEnv(\"baseURL\", \"baseURL\", \"\");\r",
+							"pm.variables.set(\"baseURL\",baseURL);\r",
+							"\r",
+							"let endPoint = util.getVariableOrEnv(\"endPoint\", \"endPoint\", \"booking\");\r",
+							"pm.variables.set(\"endPoint\",endPoint);\r",
+							"\r",
+							"let bookingId = util.getVariableOrEnv(\"bookingId\", \"bookingId\", pm.collectionVariables.get(\"bookingId\"));\r",
+							"pm.variables.set(\"bookingId\",bookingId);\r",
+							"\r",
+							"let httpMethod = util.getVariableOrEnv(\"httpMethod\", \"httpMethod\", \"DELETE\");\r",
+							"pm.request.method = httpMethod;\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expMessage = pm.variables.get(\"message\");\r",
+							"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+							"\r",
+							"//NEGATIVE TEST VALIDATION\r",
+							"//1. Status Code\r",
+							"responseValidation.validateStatusCode_Negative();\r",
+							"\r",
+							"//2. Status Line\r",
+							"responseValidation.validateStatusLine_Negative();\r",
+							"\r",
+							"//3. Response Header Content Type\r",
+							"if(scenarioName.includes(\"Incorrect BaseURL\")) {\r",
+							"    pm.test(`Validate ${scenarioName} - Content-Type header is text/html`, () => {\r",
+							"        pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+							"    });\r",
+							"}else{\r",
+							"    responseValidation.validateResponseHeaderContentType_text();\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "token={{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/{{endPoint}}/{{bookingId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"{{endPoint}}",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"/** Set up Environment values dynamically at run time through newman command */\r",
+					"let test_env = pm.variables.get(\"test_env\");\r",
+					"\r",
+					"if (!test_env) {\r",
+					"    // Set default values\r",
+					"    pm.environment.set(\"username\", \"admin\");\r",
+					"    pm.environment.set(\"password\", \"password123\");\r",
+					"    pm.environment.set(\"baseURL\", \"https://restful-booker.herokuapp.com\");\r",
+					"} else {\r",
+					"    // Get credentials from Newman command-line vars\r",
+					"    pm.environment.set(\"username\", pm.variables.get(\"cmd_username\"));\r",
+					"    pm.environment.set(\"password\", pm.variables.get(\"cmd_password\"));\r",
+					"\r",
+					"    if (test_env === \"QA\") {\r",
+					"        pm.environment.set(\"baseURL\", \"https://restful-booker.herokuapp.com\");\r",
+					"    } else if (test_env === \"DEV\") {\r",
+					"        pm.environment.set(\"baseURL\", \"https://dev.restful-booker.herokuapp.com\");\r",
+					"    } else if (test_env === \"STAGE\") {\r",
+					"        pm.environment.set(\"baseURL\", \"https://stage.restful-booker.herokuapp.com\");\r",
+					"    }\r",
+					"}\r",
+					"\r",
+					"/** Utility Functions */\r",
+					"util = {\r",
+					"    getVariableOrEnv: function (varName, envName, defaultValue) {\r",
+					"        if (Object.prototype.hasOwnProperty.call(pm.variables.toObject(), varName)) {\r",
+					"            return pm.variables.get(varName);\r",
+					"        } else if (Object.prototype.hasOwnProperty.call(pm.environment.toObject(), envName)) {\r",
+					"            return pm.environment.get(envName);\r",
+					"        } else {\r",
+					"            return defaultValue;\r",
+					"        }\r",
+					"    },\r",
+					"\r",
+					"    getBookingPayload: function (bookingDataset){\r",
+					"        return {\r",
+					"            \"firstname\": bookingDataset.firstname,\r",
+					"            \"lastname\": bookingDataset.lastname,\r",
+					"            \"totalprice\": bookingDataset.totalprice,\r",
+					"            \"depositpaid\": bookingDataset.depositpaid,\r",
+					"            \"bookingdates\": {\r",
+					"                \"checkin\": bookingDataset.checkin,\r",
+					"                \"checkout\": bookingDataset.checkout\r",
+					"            },\r",
+					"            \"additionalneeds\": bookingDataset.additionalneeds\r",
+					"        }\r",
+					"    },\r",
+					"\r",
+					"    generateAuthToken: function () {\r",
+					"        const username = pm.environment.get(\"username\");\r",
+					"        const password = pm.environment.get(\"password\");\r",
+					"\r",
+					"        pm.sendRequest({\r",
+					"            url: pm.environment.get(\"baseURL\") + '/auth',\r",
+					"            method: 'POST',\r",
+					"            header: {\r",
+					"                'Content-Type': 'application/json'\r",
+					"            },\r",
+					"            body: {\r",
+					"                mode: 'raw',\r",
+					"                raw: JSON.stringify({ username, password })\r",
+					"            }\r",
+					"        }, function (err, res) {\r",
+					"            if (err) {\r",
+					"                console.log(\"Auth error:\", err);\r",
+					"                return;\r",
+					"            }\r",
+					"            const token = res.json().token;\r",
+					"            pm.variables.set(\"token\", token);\r",
+					"\r",
+					"        });\r",
+					"    }\r",
+					"};\r",
+					"\r",
+					"\r",
+					"/** Retry-aware data loading logic - Skip data handling if a retry is in progress*/\r",
+					"var retryCount = pm.collectionVariables.get('retryCounter');\r",
+					"if (retryCount) {\r",
+					"    console.log(`retrycounter value at collection level = ${retryCount}`)\r",
+					"    console.log(`Retry in progress (count = ${retryCount}) — skipping data shifting.`);\r",
+					"   return;\r",
+					"}\r",
+					"\r",
+					"\r",
+					"/** Reading data from external JSON file */\r",
+					"const reservedKeys = ['requestData']; \r",
+					"Object.keys(pm.variables.toObject()).forEach(key => { \r",
+					"    if (!reservedKeys.includes(key)) { \r",
+					"        pm.variables.unset(key); \r",
+					"    }\r",
+					"});\r",
+					"\r",
+					"if (typeof pm.variables.get('requestData') !== 'object') {\r",
+					"    pm.variables.set('requestData', pm.iterationData.toObject());\r",
+					"}\r",
+					"\r",
+					"const requestData = pm.variables.get('requestData');\r",
+					"\r",
+					"if (typeof requestData !== 'object' || Object.keys(requestData).length === 0) {\r",
+					"    console.log('No external data provided/data set is empty');\r",
+					"    return;\r",
+					"}\r",
+					"\r",
+					"const currentRequest = requestData.requests.find(({ name }) => name === pm.info.requestName);\r",
+					"\r",
+					"if (!currentRequest) {\r",
+					"    console.log(`Request ${pm.info.requestName} has no data.`);\r",
+					"    return;\r",
+					"}\r",
+					"\r",
+					"if (currentRequest && currentRequest.data && currentRequest.data.length > 0) {\r",
+					"    console.log(\"Size of current request data set = \" + currentRequest.data.length);\r",
+					"    const currentDataSet = currentRequest.data.shift(); // get and remove first test dataset\r",
+					"\r",
+					"    if (currentDataSet) {\r",
+					"        Object.entries(currentDataSet).forEach(([key, value]) => {\r",
+					"            pm.variables.set(key, value);\r",
+					"        });\r",
+					"\r",
+					"        let requestSet = [\"Negative - CreateBooking\",\"Negative - UpdateBooking\",\"PartialUpdateBooking\"];\r",
+					"        if(requestSet.includes(currentRequest.name)){\r",
+					"            pm.variables.set('currentDataset', currentDataSet);     \r",
+					"        }\r",
+					"\r",
+					"        // Store updated requestData (after the shift) with remaining tests\r",
+					"        pm.collectionVariables.set(\"requestData\", JSON.stringify(requestData));\r",
+					"\r",
+					"        // Re-run same request with next data in next iteration\r",
+					"        if (currentRequest.data.length > 0) {\r",
+					"            pm.execution.setNextRequest(pm.info.requestName);\r",
+					"        }\r",
+					"    } else {\r",
+					"        console.error('No variables found for this request.');\r",
+					"    }\r",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"setTimeout(() => {}, 1000);\r",
+					"const scenarioName = pm.variables.get(\"scenarioName\");\r",
+					"const expStatusCode = pm.variables.get(\"statusCode\");\r",
+					"const expStatusLine = pm.variables.get(\"statusLine\");\r",
+					"\r",
+					"//Response Validation Functions\r",
+					"responseValidation = {\r",
+					"    \r",
+					"//NEGATIVE TEST VALIDATION\r",
+					"\r",
+					"    //1. Status\r",
+					"    validateStatusCode_Negative: function (/*expStatusCode, scenarioName*/) {\r",
+					"        pm.test(`Validate ${scenarioName} - Status Code is ${expStatusCode}`, function () {\r",
+					"            pm.response.to.have.status(expStatusCode);\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //2. Status Line\r",
+					"    validateStatusLine_Negative: function () {\r",
+					"        pm.test(`Validate ${scenarioName} - Status Line is ${expStatusLine}`, function () {\r",
+					"            pm.response.to.have.status(expStatusLine);\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //3. Scenario specific Tests\r",
+					"    validateResponseHeaderContentType_text: function () {\r",
+					"        pm.test(`Validate ${scenarioName} - Validate Response Header Text ContentType`, function () {\r",
+					"            pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"//POSITIVE TEST VALIDATION\r",
+					"\r",
+					"    //1a. Status_200\r",
+					"    validateStatusCode_200: function (/*expStatusCode, scenarioName*/) {\r",
+					"        pm.test(\"Status code is 200\", function () {\r",
+					"            pm.response.to.have.status(200);\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //1b. Status_201\r",
+					"    validateStatusCode_201: function (/*expStatusCode, scenarioName*/) {\r",
+					"        pm.test(\"Status code is 201\", function () {\r",
+					"            pm.response.to.have.status(201);\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //1c. Status_204\r",
+					"    validateStatusCode_204: function (/*expStatusCode, scenarioName*/) {\r",
+					"        pm.test(\"Status code is 204\", function () {\r",
+					"            pm.response.to.have.status(204);\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //2a. Status Line_OK\r",
+					"    validateStatusLine_OK: function () {\r",
+					"        pm.test(\"Status message is OK\", function () {\r",
+					"            pm.response.to.have.status(\"OK\");\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //2b. Status Line_Created\r",
+					"    validateStatusLine_Created: function () {\r",
+					"        pm.test(\"Status message is Created\", function () {\r",
+					"            pm.response.to.have.status(\"Created\");\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //2c. Status Line_No Content\r",
+					"    validateStatusLine_NoContent: function () {\r",
+					"        pm.test(\"Status message is No Content\", function () {\r",
+					"            pm.response.to.have.status(\"No Content\");\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    //3. Test for Content-Type header having a particular value\r",
+					"    validateResponseHeaderContentType_json: function () {\r",
+					"        pm.test(\"Content-Type header is application/json\", () => {\r",
+					"            pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+					"        });\r",
+					"    },\r",
+					"\r",
+					"    validateResponseHeaderContentType_html: function () {\r",
+					"        pm.test(\"Content-Type header is text/html\", () => {\r",
+					"            pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');\r",
+					"        });\r",
+					"    }, \r",
+					"\r",
+					"    validateResponseHeaderContentType_text: function () {\r",
+					"        pm.test(\"Content-Type header is text/plain\", () => {\r",
+					"            pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');\r",
+					"        });\r",
+					"    }   \r",
+					"};\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					"\r",
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "requestData",
+			"value": ""
+		},
+		{
+			"key": "totalCountBeforeBooking",
+			"value": ""
+		},
+		{
+			"key": "bookingId",
+			"value": ""
+		},
+		{
+			"key": "booking",
+			"value": ""
+		}
+	]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "booking-api-tests",
+  "dependencies": {
+    "newman": "^6.1.0",
+    "newman-reporter-htmlextra": "^1.22.10",
+    "nodemailer": "^6.9.3"
+  }
+}
