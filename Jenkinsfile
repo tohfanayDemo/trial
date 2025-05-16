@@ -54,16 +54,18 @@ pipeline {
                             newman run "%WORKSPACE%\\Booking.postman_collection.json" ^
                             -e "%WORKSPACE%\\Booking.postman_environment.json" ^
                             -d "%WORKSPACE%\\bookingAPI_testData.json" ^
-                            -r cli,json,junit,html,htmlextra ^
+                            -r cli,json,junit,html,htmlextra,allure ^
                             --reporter-json-export "%WORKSPACE%\\reports\\report.json" ^
                             --reporter-htmlextra-export "%WORKSPACE%\\reports\\htmlextra_report.html" ^
-			    --reporter-htmlextra-includeAssets ^ //This forces the reporter to generate all CSS/JS/assets locally in the same folder (/assets, etc.), so Jenkins can archive them and serve them with the HTML.
+			    --reporter-htmlextra-includeAssets ^ 
                             --disable-unicode ^
                             --env-var test_env=${params.TEST_ENV} ^
                             --env-var cmd_username=%USERNAME% ^
                             --env-var cmd_password=%PASSWORD% ^
-							|| exit 0
-							//This tells Jenkins: "Even if Newman fails (exit code 1), treat this step as successful so the next stages can run."
+			     || exit 0
+			     //^ --> means next line in windows OS
+			     //exit 0 - This tells Jenkins: "Even if Newman fails (exit code 1), treat this step as successful so the next stages can run."
+       			     //--reporter-htmlextra-includeAssets --> This forces the reporter to generate all CSS/JS/assets locally in the same folder (/assets, etc.), so Jenkins can archive them and serve them with the HTML.
                         """
                     }
                 }
