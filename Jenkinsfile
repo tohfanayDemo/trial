@@ -57,6 +57,7 @@ pipeline {
                             -r cli,json,junit,html,htmlextra ^
                             --reporter-json-export "%WORKSPACE%\\reports\\report.json" ^
                             --reporter-htmlextra-export "%WORKSPACE%\\reports\\htmlextra_report.html" ^
+			    --reporter-htmlextra-includeAssets ^ //This forces the reporter to generate all CSS/JS/assets locally in the same folder (/assets, etc.), so Jenkins can archive them and serve them with the HTML.
                             --disable-unicode ^
                             --env-var test_env=${params.TEST_ENV} ^
                             --env-var cmd_username=%USERNAME% ^
