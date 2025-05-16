@@ -47,9 +47,9 @@ pipeline {
             steps {
                 script {
                     // Create reports folder if not exists
-					bat 'if not exist "%WORKSPACE%\\reports" mkdir "%WORKSPACE%\\reports"'
-					
-					withCredentials([usernamePassword(credentialsId: "${env.CREDS_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    bat 'if not exist "%WORKSPACE%\\reports" mkdir "%WORKSPACE%\\reports"'
+
+                    withCredentials([usernamePassword(credentialsId: "${env.CREDS_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         bat """
                             newman run "%WORKSPACE%\\Booking.postman_collection.json" ^
                             -e "%WORKSPACE%\\Booking.postman_environment.json" ^
@@ -57,15 +57,16 @@ pipeline {
                             -r cli,json,junit,html,htmlextra,allure ^
                             --reporter-json-export "%WORKSPACE%\\reports\\report.json" ^
                             --reporter-htmlextra-export "%WORKSPACE%\\reports\\htmlextra_report.html" ^
-			    --reporter-htmlextra-includeAssets ^ 
+                            --reporter-htmlextra-includeAssets ^
+                            --reporter-allure-export "%WORKSPACE%\\reports\\allure-results" ^
                             --disable-unicode ^
                             --env-var test_env=${params.TEST_ENV} ^
                             --env-var cmd_username=%USERNAME% ^
                             --env-var cmd_password=%PASSWORD% ^
-			     || exit 0
-			     //^ --> means next line in windows OS
-			     //exit 0 - This tells Jenkins: "Even if Newman fails (exit code 1), treat this step as successful so the next stages can run."
-       			     //--reporter-htmlextra-includeAssets --> This forces the reporter to generate all CSS/JS/assets locally in the same folder (/assets, etc.), so Jenkins can archive them and serve them with the HTML.
+                            || exit 0
+                            //^ --> means next line in Windows OS
+                            //exit 0 - This tells Jenkins: "Even if Newman fails (exit code 1), treat this step as successful so the next stages can run."
+                            //--reporter-htmlextra-includeAssets --> Generates all CSS/JS/assets locally in the reports folder
                         """
                     }
                 }
@@ -92,27 +93,14 @@ pipeline {
                 }
             }
         }
-
-        stage('Email Report') {
-            steps {
-                emailext(
-                    subject: "${EMAIL_SUBJECT}",
-                    body: """Test execution completed.<br>
-                             <b>Build:</b> ${env.BUILD_URL}<br>
-                             <b>Result:</b> ${currentBuild.currentResult}<br><br>
-                             See attached HTML report.""",
-                    to: "${RECIPIENTS}",
-                    mimeType: 'text/html',
-                    attachmentsPattern: 'reports/htmlextra_report.html',
-                    attachLog: true
-                )
-            }
-        }
     }
 
     post {
         always {
+            // Archive all generated reports
             archiveArtifacts artifacts: 'reports/**/*', fingerprint: true
+
+            // Publish HTML Extra report
             publishHTML(target: [
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
@@ -121,6 +109,27 @@ pipeline {
                 reportFiles: 'htmlextra_report.html',
                 reportName: 'Booking API Test Report'
             ])
+
+            // Publish Allure results (requires Allure Jenkins plugin and setup)
+            allure([
+                includeProperties: false,
+                jdk: '',
+                reportBuildPolicy: 'ALWAYS',
+                results: [[path: 'reports/allure-results']]
+            ])
+
+            // Always send email with HTML report attached
+            emailext(
+                subject: "${EMAIL_SUBJECT}",
+                body: """Test execution completed.<br>
+                         <b>Build:</b> <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a><br>
+                         <b>Result:</b> ${currentBuild.currentResult}<br><br>
+                         See attached <b>HTML report</b> or <a href="${env.BUILD_URL}">view online</a>.""",
+                to: "${RECIPIENTS}",
+                mimeType: 'text/html',
+                attachmentsPattern: 'reports/htmlextra_report.html',
+                attachLog: true
+            )
         }
 
         failure {
