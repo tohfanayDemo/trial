@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         EMAIL_SUBJECT = "🧪 Booking API Test Report - ${env.JOB_NAME} #${env.BUILD_TAG}"
-        RECIPIENTS = "tnselenium@gmail.com"
+        RECIPIENTS = "tohfa.nay@gmail.com"
         THRESHOLD = 80
     }
 
