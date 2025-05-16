@@ -109,7 +109,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
+            archiveArtifacts artifacts: 'reports/**/*', fingerprint: true
             publishHTML(target: [
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
