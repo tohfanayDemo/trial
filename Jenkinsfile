@@ -119,14 +119,14 @@ pipeline {
                 keepAll: true,
                 reportDir: 'reports',
                 reportFiles: 'htmlextra_report.html',
-                reportName: 'Postman API Test Report'
+                reportName: 'Booking API Test Report'
             ])
         }
 
         failure {
             mail to: "${RECIPIENTS}",
                  subject: "❌ FAILED: ${EMAIL_SUBJECT}",
-                 body: "The Postman test pipeline failed. Check Jenkins for full logs."
+                 body: "The Booking API test pipeline failed. Check Jenkins for full logs."
         }
     }
 }
